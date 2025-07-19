@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Feedback Comedor</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+    }
+    body {
+      display: grid;
+      /* 1ª fila vacía 30%, 2ª fila con las caras 70% */
+      grid-template-rows: 30% 70%;
+      background: #fff;
+      touch-action: manipulation;
+    }
+    /* Fila de las caritas */
+    #container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+    .face {
+        flex: 1;
+        height: 100%;          /* ← Añadir esto */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 40vh;        /* ← Ajustar esto según necesidades */
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.1s;
+    }
+
+    .face:active { transform: scale(0.9); }
+    .green  { background: #d4f5d4; color: #2e7d32; }
+    .yellow { background: #fff9c4; color: #f9a825; }
+    .red    { background: #ffcdd2; color: #c62828; }
+
+    /* Mensaje de “¡Gracias!” */
+    #thankyou {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: none;
+      justify-content: center; align-items: center;
+      font-size: 8vw;
+      background: rgba(255,255,255,0.9);
+    }
+
+    header {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 1vh;
+    font-family: sans-serif;
+    }
+
+    header h1 {
+    font-size: 4vw;
+    font-weight: 300;
+    margin: 0;
+    color: #555;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- 1ª fila (vacía) -->
+  <div>
+    <header>
+        <h1>Give feedback to our cookers 🍽️</h1>
+    </header>
+  </div>
+
+  <!-- 2ª fila: las caras -->
+  <div id="container">
+    <div class="face green"  data-feedback="2">😊</div>
+    <div class="face yellow" data-feedback="1">😐</div>
+    <div class="face red"    data-feedback="0">☹️</div>
+  </div>
+
+  <div id="thankyou">Thank you!</div>
+
+  <script>
+    const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxNK9Cj7RYOX4acmXq-jFjfPc2nRHqL0aUR9SyKuNINNDH42x-SU8nXeVzHFvxwB_Yg/exec';
+    
+    const faces = document.querySelectorAll('.face');
+    const TY    = document.getElementById('thankyou');
+    let locked = false;
+
+    faces.forEach(face => {
+      face.addEventListener('click', () => {
+        if (locked) return;
+        locked = true;
+        const fb = face.dataset.feedback;
+
+        fetch(ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feedback: fb, timestamp: Date.now() })
+        }).catch(console.error);
+
+        TY.style.display = 'flex';
+        setTimeout(() => {
+          TY.style.display = 'none';
+          locked = false;
+        }, 1000);
+      });
+    });
+  </script>
+</body>
+</html>
